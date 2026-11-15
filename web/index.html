@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Surfactant — どのバージョンからでも入れる、BungeeCord式のMinecraftプロキシ</title>
+  <meta name="description" content="Surfactant は DetergentMC の自前エンジンを使った BungeeCord式の Minecraft プロキシ。クライアントのプロトコルをバックエンドのプロトコルに揃えてから渡すので、後ろのサーバーは内部変換がいらない。Java 1.0〜26.3 の全対応を目指す。">
+  <meta property="og:title" content="Surfactant — どのバージョンからでも入れる、BungeeCord式のMinecraftプロキシ">
+  <meta property="og:description" content="Surfactant は DetergentMC の自前エンジンを使った BungeeCord式の Minecraft プロキシ。クライアントのプロトコルをバックエンドのプロトコルに揃えてから渡すので、後ろのサーバーは内部変換がいらない。Java 1.0〜26.3 の全対応を目指す。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./" aria-label="Surfactant">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="var(--accent)"/><circle cx="12" cy="18" r="5.5" fill="none" stroke="#0b0f14" stroke-width="2.4"/><circle cx="20.5" cy="11.5" r="3.6" fill="none" stroke="#0b0f14" stroke-width="2.2"/><circle cx="21.5" cy="21.5" r="2" fill="#0b0f14"/></svg>
+      <span>Surfactant</span>
+    </a>
+    <nav>
+      <a href="./" class="active">ホーム</a>
+      <a href="how.html">仕組み</a>
+      <a href="products.html">製品</a>
+      <a href="roadmap.html">ロードマップ</a>
+      <a href="versions.html">対応バージョン</a>
+    </nav>
+  </header>
+  <main>
+
+    <section class="hero">
+      <p class="eyebrow">Minecraft Java Edition · Bedrock Edition · BungeeCord式プロキシ · 開発中</p>
+      <h1>いくつものサーバーを、<br>ひとつの入口に。</h1>
+      <p class="lead">
+        Surfactant は DetergentMC の自前エンジンを使った、BungeeCord式の Minecraft プロキシサーバーです。<br>
+        クライアントのプロトコルを、行き先のバックエンドのプロトコルに揃えてから渡します。<br>
+        だから後ろのサーバーは自分のプロトコルで来た接続だけを受ければよく、内部変換がいりません。
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="how.html">仕組みを見る</a>
+        <a class="btn" href="versions.html">対応バージョンを見る</a>
+      </div>
+      <pre class="term" aria-label="起動イメージ"><span class="prompt">$</span> java -jar surfactant-0.1.0.jar --workdir run
+<span class="dim">INFO  Surfactant listening on 0.0.0.0:25565 (Java)
+INFO  Surfactant listening on 0.0.0.0:19132 (Bedrock)</span></pre>
+    </section>
+
+    <section class="section">
+      <div class="stats">
+        <div><span class="num">19<small>プロトコル</small></span><span class="label">Java 758〜776（1.18.2〜26.2）</span></div>
+        <div><span class="num">361<small>通り</small></span><span class="label">クライアント × バックエンド 19 × 19</span></div>
+        <div><span class="num">30<small>プロトコル</small></span><span class="label">Bedrock 1.20.0〜26.51</span></div>
+        <div><span class="num">2<small>つの入口</small></span><span class="label">Java TCP 25565 ・ Bedrock UDP 19132</span></div>
+      </div>
+      <p class="note">数字は 2026-11-15 時点のものです。土台の段階では、統合テスト済みのセルは 3 セル（偽 776 クライアントと偽 763 クライアントから実バニラ 26.2 へ、偽 763 クライアントから実バニラ 1.20.4 へ）です。テストはプロトコルレベルの検証で、本物のゲームクライアントでの確認はまだ行っていません。詳しくは下の「正直な話」をご覧ください。</p>
+    </section>
+
+    <section class="section">
+      <h2>ダウンロード</h2>
+      <p class="sub">jar はまだ配布していません。<strong>準備中</strong>です。公開までは、ソースコードからビルドしてください。ビルド方法は<a href="products.html">製品ページ</a>をご覧ください。</p>
+      <ul class="facts">
+        <li><strong>公開準備中：</strong>ダウンロードできる jar はまだありません。初回リリースの時期もまだ決まっていません。</li>
+        <li><strong>リポジトリ：</strong>DetergentMC とは別のリポジトリで公開する予定です。GitHub の公開リポジトリも準備中です。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <div class="grid">
+        <a class="card link" href="how.html"><h3>仕組み →</h3><p>クライアント → Surfactant → バックエンド。プロトコル正規化、/server での移動、Bedrock の変換、転送信頼の概要。</p></a>
+        <a class="card link" href="products.html"><h3>製品 →</h3><p>Surfactant 本体について。無料・公開前提のプロジェクトです。jar は準備中です。</p></a>
+        <a class="card link" href="versions.html"><h3>対応バージョン →</h3><p>Java 758〜776 と Bedrock 30 プロトコルの対応状況。1.0〜26.3 へのロードマップも。</p></a>
+        <a class="card link" href="roadmap.html"><h3>ロードマップ →</h3><p>土台から、サーバー移動の完成、757・777 への拡張、実機確認、初回リリースへ。</p></a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>目指すところ</h2>
+      <div class="goals">
+        <div class="goal"><span class="num">1</span><div><h3>変換は手前で1回だけ</h3><p>サーバーが何台あっても、バージョン間の変換は Surfactant が手前で1回だけ行います。後ろのサーバーは内部変換をしません。</p></div></div>
+        <div class="goal"><span class="num">2</span><div><h3>どのバージョンからでも入れる</h3><p>最終目標は Java 1.0〜26.3 の全対応です。古いクライアントも、新しいクライアントも、同じ入口から入れるようにします。</p></div></div>
+        <div class="goal"><span class="num">3</span><div><h3>Java も Bedrock も同じ入口に</h3><p>Geyser風の変換と Floodgate風の認証を内蔵し、Bedrock のプレイヤーも Java のバックエンドに入れるようにします。Java アカウントがなくても入れます。</p></div></div>
+        <div class="goal"><span class="num">4</span><div><h3>DetergentMC の姉妹プロジェクトとして</h3><p>エンジンは DetergentMC の自前実装を使います。日本語のドキュメント・設定・サポートを土台に、英語をはじめ他の言語にも広げていきます。公開して色んな人に使ってもらうのが目標です。</p></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>正直な話</h2>
+      <ul class="facts">
+        <li><strong>本物のゲームクライアントでの確認は、まだどの組み合わせも行っていません。</strong>テストはすべてプロトコルレベルの検証（偽クライアントと本物のバニラサーバー）です。サーバー移動の実行など、実機での確認が必要な項目が残っています。</li>
+        <li><strong>開発段階です。</strong>土台ができたばかりで、実際のサーバー移動の実行やプレイヤーリストの統合はまだ次の段階です。ダウンロードできる jar もまだありません。</li>
+        <li><strong>Bedrock には制限があります。</strong>インベントリはエンジン側で未対応で、Xbox 署名の検証や暗号化はまだありません。最新の Bedrock 26.60 / 26.62 には未対応です。</li>
+        <li><strong>エンジンの制限も引き継ぎます。</strong>Java 側のチャンク翻訳は、ブロック値の誤訳の疑いがあることが分かっています（調査中です）。</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <div class="footgrid">
+      <div>
+        <strong>Surfactant</strong>
+        <p>いくつものサーバーを、ひとつの入口に。</p>
+      </div>
+      <div>
+        <a href="how.html">仕組み</a> · <a href="products.html">製品</a> · <a href="roadmap.html">ロードマップ</a> · <a href="versions.html">対応バージョン</a><br>
+        <a href="https://github.com/DetergentMC/Surfactant" rel="noopener">Surfactant（ソースコード）</a> · <a href="https://detergentmc.github.io/DetergentMC/" rel="noopener">DetergentMC（姉妹プロジェクト）</a> · <a href="https://github.com/DetergentMC/DetergentMC" rel="noopener">DetergentMC（ソースコード）</a>
+      </div>
+    </div>
+    <p class="disclaimer">© 2026 Surfactant · Surfactant は Mojang Studios / Microsoft の公式製品ではなく、承認も受けていません。"Minecraft" は Mojang Synergies AB の商標です。</p>
+  </footer>
+</body>
+</html>

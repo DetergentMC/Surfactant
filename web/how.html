@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>仕組み — Surfactant</title>
+  <meta name="description" content="Surfactant の仕組み。クライアント → Surfactant → バックエンド。プロトコル正規化、/server での移動、Bedrock の変換、Floodgate風の認証、転送信頼の概要。">
+  <meta property="og:title" content="仕組み — Surfactant">
+  <meta property="og:description" content="Surfactant の仕組み。クライアント → Surfactant → バックエンド。プロトコル正規化、/server での移動、Bedrock の変換、Floodgate風の認証、転送信頼の概要。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./" aria-label="Surfactant">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="var(--accent)"/><circle cx="12" cy="18" r="5.5" fill="none" stroke="#0b0f14" stroke-width="2.4"/><circle cx="20.5" cy="11.5" r="3.6" fill="none" stroke="#0b0f14" stroke-width="2.2"/><circle cx="21.5" cy="21.5" r="2" fill="#0b0f14"/></svg>
+      <span>Surfactant</span>
+    </a>
+    <nav>
+      <a href="./">ホーム</a>
+      <a href="how.html" class="active">仕組み</a>
+      <a href="products.html">製品</a>
+      <a href="roadmap.html">ロードマップ</a>
+      <a href="versions.html">対応バージョン</a>
+    </nav>
+  </header>
+  <main>
+
+    <section class="page-head">
+      <h1>仕組み</h1>
+      <p class="lead">Surfactant は BungeeCord式のプロキシです。プレイヤーは Surfactant にだけ接続し、Surfactant が行き先のバックエンドのプロトコルに揃えてから渡します。後ろのサーバーは自分のプロトコルで来た接続だけを受ければよく、内部変換がいりません。</p>
+    </section>
+
+    <section class="section">
+      <h2>流れ</h2>
+      <div class="diagram">
+        <div class="box">
+          <h3>クライアント</h3>
+          <p>Java クライアント（1.19〜26.2）と Bedrock クライアントが、Surfactant に接続します。</p>
+          <div class="layer">Java TCP 25565</div>
+          <div class="layer">Bedrock UDP 19132</div>
+        </div>
+        <div class="box highlight">
+          <h3>Surfactant</h3>
+          <p>経路表で行き先を決め、クライアントのプロトコルをバックエンドのプロトコルに揃えます。/server での移動と、転送信頼の署名もここで行います。</p>
+          <div class="layer">経路表・振り分け</div>
+          <div class="layer">プロトコル正規化の判定</div>
+          <div class="layer">/server コマンド</div>
+          <div class="layer">転送信頼の署名</div>
+        </div>
+        <div class="box">
+          <h3>バックエンド</h3>
+          <p>ロビー・サバイバルなどのサーバーです。DetergentMC やバニラサーバーを置きます。バックエンドごとにプロトコルが違ってかまいません。</p>
+          <div class="layer">lobby — 127.0.0.1:25566（776）</div>
+          <div class="layer">survival — 127.0.0.1:25567（763）</div>
+        </div>
+      </div>
+      <p class="note">設定は <code>surfactant.yml</code> に書きます。バックエンドは <code>backends</code> に複数登録し、<code>default-backend</code> で既定の行き先を指定します。</p>
+    </section>
+
+    <section class="section">
+      <h2>プロトコル正規化</h2>
+      <p class="sub">判断は「同じ→素通し、古い→上向き、新しい→下向き」の1か所に集まっています。翻訳そのものは DetergentMC のエンジンが行います。正規化は移動のたびに行うので、移動先が変われば判断も変わります。</p>
+      <div class="compare">
+        <table>
+          <thead><tr><th>クライアント</th><th>バックエンド</th><th>判断</th></tr></thead>
+          <tbody>
+            <tr><td>776</td><td>776</td><td>素通し（バイト列をそのまま中継）</td></tr>
+            <tr><td>763</td><td>776</td><td>上向きに翻訳（エンジン）</td></tr>
+            <tr><td>776</td><td>763</td><td>下向きに翻訳（エンジン）</td></tr>
+            <tr><td>未対応のプロトコル</td><td>776</td><td>断る（未対応の切断メッセージ）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>/server での移動</h2>
+      <p class="sub">プレイヤーは Surfactant に接続すると、まず既定のバックエンド（例：lobby）に入ります。<code>/server</code> で移動できるバックエンドの一覧を見られ、<code>/server &lt;名前&gt;</code> で別のバックエンドへ移動します。</p>
+      <ul class="facts">
+        <li><strong>Transfer パケット（766・1.20.5 以降）：</strong>サーバー側が Transfer パケットを送り、クライアントが自分で指定のアドレスへ接続し直します。切断なしで移動できます。</li>
+        <li><strong>再接続フロー（765 以前）：</strong>Transfer パケットがないため、プロキシ側で「切断→再ログイン相当の流れ」を作ります（BungeeCord式）。</li>
+        <li><strong>土台の段階では：</strong>経路表・既定バックエンドへの参加・<code>/server</code> コマンドの解釈と移動要求の組み立て・方式の判定までが動きます。実際の移動の実行（Transfer パケットの送信、再接続フローの実装）は次の段階です。<code>/server</code> は今のところ要求を作るだけで、移動しません。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Bedrock の変換</h2>
+      <p class="sub">Bedrock Edition のクライアントも、同じ Surfactant で受け付けます。UDP 19132 番で待ち受け、RakNet プロトコル 30 個に対応しています。変換は DetergentMC のエンジン（Geyser風）が行います。</p>
+      <ul class="facts">
+        <li><strong>チャンク・エンティティの翻訳：</strong>Java のブロック状態を Bedrock のランタイム ID に変換します。バイオームやエンティティも変換します。加入・チャット・移動までが土台の目標です。</li>
+        <li><strong>Floodgate風の認証：</strong>Java アカウントがなくても入れます。Xbox の XUID から決定的な UUID を作り、名前の先頭に <code>.</code> を付けます（既定の接頭辞は <code>.</code>）。</li>
+        <li><strong>制限：</strong>インベントリはエンジン側で未対応です。Xbox 署名の検証や暗号化はまだなく、NACK による再送もありません。最新の Bedrock 26.60 / 26.62 には未対応です。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>転送信頼</h2>
+      <p class="sub">Surfactant と後ろのサーバーのあいだでだけ共有する秘密で、転送するプレイヤー情報に署名します。後ろのサーバーは署名を検証し、合うものだけを「Surfactant 経由の信頼できる接続」として受け入れます。</p>
+      <ul class="facts">
+        <li><strong>方式：</strong>共有シークレットで HMAC-SHA256 署名します（考え方は Velocity と同じですが、形式は Surfactant 独自のもので、Velocity とバイト互換ではありません）。</li>
+        <li><strong>設定：</strong><code>forwarding.mode</code>（<code>none</code>／<code>velocity</code>）と <code>forwarding.secret</code> を指定します。<code>velocity</code> のとき secret が空だと起動時にエラーで止まります。</li>
+        <li><strong>土台の段階では：</strong>Surfactant 側の署名・検証とペイロードの組み立てまでが動きます。DetergentMC 側の受け入れ（署名の検証と、検証済み接続の信頼）は次の段階です。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>online-mode認証とリソースパック</h2>
+      <ul class="facts">
+        <li><strong>online-mode認証：</strong>翻訳が必要な接続では、Surfactant が Mojang 認証（hasJoined）を自分で完結させ、認証済みの接続だけを内部のバックエンド（offline-mode・信頼済み接続）へ繋ぎます。素通しの接続では暗号化ハンドシェイクもそのまま通します。</li>
+        <li><strong>リソースパック：</strong>クライアントのプロトコルに合うパックをエンジンが選びます。外部 HTTPS 配信を使う場合は <code>resource-pack.url</code>（<code>https://</code> のみ）と <code>resource-pack.sha1</code> を指定します。空ならループバック配信です。公開用の HTTPS 置き場はまだ決まっていません。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>正直な話</h2>
+      <ul class="facts">
+        <li><strong>本物のゲームクライアントでの確認は、まだどの組み合わせも行っていません。</strong>検証はプロトコルレベル（偽クライアントと本物のバニラサーバー）です。</li>
+        <li><strong>実際のサーバー移動はまだ動きません。</strong>土台の段階では <code>/server</code> は移動要求を作るところまでです。プレイヤーリストの統合も設計だけで、実装は次の段階です。</li>
+        <li><strong>エンジンの制限も引き継ぎます。</strong>Java 側のチャンク翻訳は、ブロック値の誤訳の疑いがあることが分かっています（調査中です）。Declare Recipes／Statistics／Tags／World Event ID はエンジン側で全方向で未対応です。</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <div class="footgrid">
+      <div>
+        <strong>Surfactant</strong>
+        <p>いくつものサーバーを、ひとつの入口に。</p>
+      </div>
+      <div>
+        <a href="how.html">仕組み</a> · <a href="products.html">製品</a> · <a href="roadmap.html">ロードマップ</a> · <a href="versions.html">対応バージョン</a><br>
+        <a href="https://github.com/DetergentMC/Surfactant" rel="noopener">Surfactant（ソースコード）</a> · <a href="https://detergentmc.github.io/DetergentMC/" rel="noopener">DetergentMC（姉妹プロジェクト）</a> · <a href="https://github.com/DetergentMC/DetergentMC" rel="noopener">DetergentMC（ソースコード）</a>
+      </div>
+    </div>
+    <p class="disclaimer">© 2026 Surfactant · Surfactant は Mojang Studios / Microsoft の公式製品ではなく、承認も受けていません。"Minecraft" は Mojang Synergies AB の商標です。</p>
+  </footer>
+</body>
+</html>

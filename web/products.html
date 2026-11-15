@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>製品 — Surfactant</title>
+  <meta name="description" content="Surfactant 本体について。無料・公開前提のプロジェクトです。ダウンロードできる jar は準備中です。">
+  <meta property="og:title" content="製品 — Surfactant">
+  <meta property="og:description" content="Surfactant 本体について。無料・公開前提のプロジェクトです。ダウンロードできる jar は準備中です。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="./" aria-label="Surfactant">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="var(--accent)"/><circle cx="12" cy="18" r="5.5" fill="none" stroke="#0b0f14" stroke-width="2.4"/><circle cx="20.5" cy="11.5" r="3.6" fill="none" stroke="#0b0f14" stroke-width="2.2"/><circle cx="21.5" cy="21.5" r="2" fill="#0b0f14"/></svg>
+      <span>Surfactant</span>
+    </a>
+    <nav>
+      <a href="./">ホーム</a>
+      <a href="how.html">仕組み</a>
+      <a href="products.html" class="active">製品</a>
+      <a href="roadmap.html">ロードマップ</a>
+      <a href="versions.html">対応バージョン</a>
+    </nav>
+  </header>
+  <main>
+
+    <section class="page-head">
+      <h1>製品</h1>
+      <p class="lead">Surfactant はひとつのプロジェクトです。本体も、仕組みも、すべて公開・無料で進めています。</p>
+    </section>
+
+    <section class="section">
+      <h2>ダウンロード</h2>
+      <p class="sub">ダウンロードできる jar はまだありません。<strong>準備中</strong>です。初回リリースの時期もまだ決まっていません。</p>
+      <ul class="facts">
+        <li><strong>公開準備中：</strong>まだ何も配布していません。公開までは、ソースコードからビルドしてください。</li>
+        <li><strong>リポジトリ：</strong>DetergentMC とは別のリポジトリで公開する予定です。GitHub の公開リポジトリも準備中です。</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>ソースコードからビルドする</h2>
+      <p class="sub">開発段階のため、今はビルドから使ってください。JDK 17 で実行します。</p>
+      <pre class="term" aria-label="ビルドと起動"><span class="prompt">$</span> JAVA_HOME=$HOME/workspace/.tools/jdk-17.0.21+9 \
+  GRADLE_USER_HOME=$HOME/.gradle \
+  JAVA_TOOL_OPTIONS="-Djava.net.preferIPv4Stack=true" \
+  ./gradlew :surfactant-proxy:fatJar
+<span class="prompt">$</span> java -jar surfactant-proxy/build/libs/surfactant-0.1.0.jar --workdir run</pre>
+      <p class="note">初回起動時に <code>surfactant.yml</code> の見本を作ります。バニラサーバーの jar は含みません。実行時に Mojang から取得します。</p>
+    </section>
+
+    <section class="section">
+      <h2>設定の例</h2>
+      <p class="sub">バックエンドは <code>backends</code> に複数登録し、<code>default-backend</code> で既定の行き先を指定します。</p>
+      <pre class="term" aria-label="surfactant.yml の例"><span class="dim"># surfactant.yml（抜粋）</span>
+backends:
+  - name: lobby
+    host: 127.0.0.1
+    port: 25566
+    protocol: 776
+  - name: survival
+    host: 127.0.0.1
+    port: 25567
+    protocol: 763
+default-backend: lobby</pre>
+    </section>
+
+    <section class="section">
+      <h2>Surfactant 本体</h2>
+      <p class="sub">DetergentMC の自前エンジンを使った BungeeCord式のプロキシサーバーです。Java で書かれています。ライセンスは DetergentMC と同じ MIT で、ソースコードは公開する予定です。</p>
+      <div class="grid">
+        <div class="card"><h3>BungeeCord式</h3><p>複数のバックエンド（ロビー・サバイバル・ミニゲームなど）をつなぎます。プレイヤーは既定のバックエンドに入り、/server で移動できます。</p></div>
+        <div class="card"><h3>変換は手前で1回だけ</h3><p>クライアントのプロトコルを、行き先のバックエンドのプロトコルに揃えてから渡します。後ろのサーバーは内部変換をしません。</p></div>
+        <div class="card"><h3>全バージョン対応を目指す</h3><p>Java 758〜776 の 19 プロトコルと Bedrock 30 プロトコルに対応済みで、最終的には Java 1.0 から 26.3 まで対応します。詳しくは<a href="versions.html">対応バージョン</a>をご覧ください。</p></div>
+        <div class="card"><h3>日本語から始めて多言語へ</h3><p>日本語のドキュメント・設定・サポートを土台に、英語をはじめ他の言語にも広げていきます。</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>使っているもの・使っていないもの</h2>
+      <dl class="faq">
+        <dt>エンジンは何を使っていますか？</dt>
+        <dd>DetergentMC の自前実装（プロトコル翻訳・Bedrock 変換・認証）を、Gradle のコンポジットビルドで参照しています。DetergentMC のコードはコピーしていません。</dd>
+        <dt>本物の ViaVersion・Geyser・Floodgate は入っていますか？</dt>
+        <dd>入っていません。ViaVersion は GPL-3.0（組み込むと Surfactant も GPL-3.0 になる）、Geyser は単体プロキシとして設計されており、Floodgate はプラグイン形式のためです。Geyser風・Via風・Floodgate風の機能は、DetergentMC の自前実装が担います。</dd>
+        <dt>姉妹プロジェクトの DetergentMC とはどう違いますか？</dt>
+        <dd>DetergentMC はサーバーソフト（バニラを土台に独自 API で動くサーバー本体）で、Surfactant はプロキシ（複数のサーバーをつなぐ入口）です。Surfactant の後ろに DetergentMC を置くことも、バニラサーバーを置くこともできます。詳しくは <a href="https://detergentmc.github.io/DetergentMC/" rel="noopener">DetergentMC の公式サイト</a>をご覧ください。</dd>
+      </dl>
+    </section>
+
+    <section class="section">
+      <h2>正直な話</h2>
+      <ul class="facts">
+        <li><strong>開発段階です。</strong>本物のゲームクライアントでの確認はまだ行っておらず、テストはプロトコルレベルの検証です。実際のサーバー移動の実行はまだ次の段階です。</li>
+        <li><strong>有料版はありません。</strong>Surfactant は無料・公開前提のプロジェクトです。</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <div class="footgrid">
+      <div>
+        <strong>Surfactant</strong>
+        <p>いくつものサーバーを、ひとつの入口に。</p>
+      </div>
+      <div>
+        <a href="how.html">仕組み</a> · <a href="products.html">製品</a> · <a href="roadmap.html">ロードマップ</a> · <a href="versions.html">対応バージョン</a><br>
+        <a href="https://github.com/DetergentMC/Surfactant" rel="noopener">Surfactant（ソースコード）</a> · <a href="https://detergentmc.github.io/DetergentMC/" rel="noopener">DetergentMC（姉妹プロジェクト）</a> · <a href="https://github.com/DetergentMC/DetergentMC" rel="noopener">DetergentMC（ソースコード）</a>
+      </div>
+    </div>
+    <p class="disclaimer">© 2026 Surfactant · Surfactant は Mojang Studios / Microsoft の公式製品ではなく、承認も受けていません。"Minecraft" は Mojang Synergies AB の商標です。</p>
+  </footer>
+</body>
+</html>
